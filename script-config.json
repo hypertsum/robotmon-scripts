@@ -20,6 +20,7 @@
         "https://github.com/r2-studio/robotmon-scripts/raw/master/libs/TaskController-0.0.1.js"
       ]
     },
+<<<<<<< HEAD
     "hypertsum.Tsum": {
       "title": "Disney Tsum Tsum",
       "versionCode": 45,
@@ -30,6 +31,18 @@
         "https://github.com/r2-studio/robotmon-scripts/raw/master/libs/TaskController-0.0.1.js"
       ]
     },
+    "hypertsum.TsumProto": {
+      "title": "Disney Tsum Tsum",
+      "versionCode": 45,
+      "description": "Prototype",
+      "packageName": "com.linecorp.LGTMTMG",
+      "downloadURL": "https://github.com/hypertsum/robotmon-scripts/raw/master/scripts/com.r2studio.TsumProto/index.zip",
+      "dependencies": [
+        "https://github.com/hypertsum/robotmon-scripts/raw/master/libs/TaskController-0.0.1.js"
+      ]
+    },
+=======
+>>>>>>> parent of 0479754... added link to personal fork
     "com.r2studio.MarvelFutureFight": {
       "title": "Marvel Future Fight / Marvel 未來之戰",
       "versionCode": 6,
@@ -81,7 +94,7 @@
       "downloadURL": "https://github.com/r2-studio/robotmon-scripts/raw/master/scripts/com.donny.StoneOnline/index.zip",
       "dependencies": [
         "https://github.com/r2-studio/robotmon-scripts/raw/master/libs/RBM-0.0.3.js",
-        "https://github.com/r2-studio/robotmon-scripts/raw/master/libs/TaskController-0.0.1.js"
+        "https://github.com/r2-studio/robotmon-scripts/raw/master/libs/TaskController-0.0.1.js" 
       ]
     },
     "com.donny.dungeonbreakers": {

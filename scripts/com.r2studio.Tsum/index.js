@@ -109,7 +109,8 @@ var Button = {
   gameMagicalTime2: {x: 750, y: 1255 + adjY, color: {"a":0,"b":13,"g":175,"r":240}},
   gameMagicalTime3: {x: 320, y: 1130 + adjY, color: {"a":0,"b":13,"g":175,"r":240}},
   gameMagicalTime4: {x: 750, y: 1130 + adjY, color: {"a":0,"b":13,"g":175,"r":240}},
-  outGameItems: [{x: 205, y: 817 + adjY},{x: 435, y: 821 + adjY},{x: 651, y: 817 + adjY},{x: 871, y: 821 + adjY},{x: 201, y: 1095 + adjY},{x: 424, y: 1098 + adjY}],
+//  outGameItems: [{x: 205, y: 817 + adjY},{x: 435, y: 821 + adjY},{x: 651, y: 817 + adjY},{x: 871, y: 821 + adjY},{x: 201, y: 1095 + adjY},{x: 424, y: 1098 + adjY}],
+  outGameItems: [{x: 205, y: 842 + adjY},{x: 435, y: 846 + adjY},{x: 651, y: 842 + adjY},{x: 871, y: 846 + adjY},{x: 201, y: 1120 + adjY},{x: 424, y: 1120 + adjY}],
   outGameEnd: {x: 890, y: 1520 + adjY, color: {"a":0,"b":15,"g":140,"r":245}},
   outStart1: {x: 500, y: 1520 + adjY, color: {"a":0,"b":19,"g":145,"r":247}}, // 開始遊戲
   outStart2: {x: 500, y: 1520 + adjY, color: {"a":0,"b":129,"g":111,"r":236}}, // 開始
@@ -355,6 +356,18 @@ var Page = {
     back: {x: 986, y: 201 + adjY},
     next: {x: 986, y: 201 + adjY},
   },
+  GamePlaying3: {
+    //Button Defintion  gamePause: {x: 983, y: 250 + adjY, color: {"a":0,"b":9,"g":188,"r":239}},
+    //Button Fan: gameRand: {x: 985, y: 1580 + adjY, color: {"a":0,"b":6,"g":180,"r":232}},
+    name: 'GamePlaying',
+    colors: [
+      {x: 990, y:  274 + adjY, r: 244, g: 197, b: 6, match: true, threshold: 80}, // right of pause
+      {x: 924, y: 1636 + adjY, r: 220, g: 140, b: 10, match: true, threshold: 80}, // below fan
+    ],
+    back: {x: 986, y: 201 + adjY},
+    next: {x: 986, y: 201 + adjY},
+  },
+
   MagicalTime: {
     name: 'MagicalTime',
     colors: [
@@ -640,7 +653,7 @@ function findAllTsumMatchScore(tsumImages, boardImg, myTsum) {
   for (var k in tsumImages) {
     var tsumImage = tsumImages[k];
     var xyScore = findImage(boardImg, tsumImage);
-    xyScore.img = tsumImage; 
+    xyScore.img = tsumImage;
     xyScore.key = k;
     if (k == myTsum) {
       xyScore.score = 1;
@@ -694,7 +707,7 @@ function recognizeGameTsums(boardImg, allTsumImages, myTsum, isJP, debug, logs) 
   if (debug) {
     printMaxScores(gameTsums);
   }
-  
+
   loadTsumRotationImages(gameTsums, isJP, debug);
   // recheck first 5(4) tsums with rotation
   for (var i = 0; i < gameTsums.length && i < Config.loadRotatedCount; i++) {
@@ -744,7 +757,7 @@ function recognizeBoard(boardImg, gameTsums, tsumCount, debug, logs) {
       }
       return results;
     }, JSON.stringify(gameTsums), boardImg, i);
-    
+
     multiTaskIds.push(ids);
   }
   sleep(50);
@@ -781,7 +794,7 @@ function recognizeBoard(boardImg, gameTsums, tsumCount, debug, logs) {
       board.push(boardTsum);
     }
   }
-  
+
   log(logs.recognizedTsums, board.length);
   sleep(30);
   log(logs.recognitionTime, usingTimeString(startTime));
@@ -889,19 +902,30 @@ function convertTo2DArray(arr, size) {
   return result;
 }
 
-function findTsums(img) {
+function findTsums(img,storagePath, runTimes) {
   var hsvImg = clone(img);
-  smooth(hsvImg, 1, 7);
+  smooth(hsvImg, 1, 5);
   convertColor(hsvImg, 40);
   var filter1 = outRange(hsvImg, 80, 160, 20, 0, 120, 255, 210, 255);
 	var filter2 = outRange(filter1, 80, 100, 90, 0, 130, 170, 190, 255);
   var mask = bgrToGray(filter2);
-  
+
+//  hsvaPlanes = new cv.MatVector();
+//  cv.split(filter2, hsvaPlanes);
+//  let S = hsvaPlanes.get(0);
+//  if (this.debug) {
+//     log('Writing tsum find filter files')
+//
+//     saveImage(filter1, storagePath + "/tmp/filter1-" + runTimes + ".jpg");
+//     saveImage(filter2, storagePath + "/tmp/filter2-" + runTimes + ".jpg");
+//     saveImage(mask, storagePath + "/tmp/mask-" + runTimes + ".jpg");
+// //  }
+
   releaseImage(filter1);
   releaseImage(filter2);
 
   var points = houghCircles(mask, 3, 1, 22, 4, 7, 8, 14);
-  
+
   smooth(hsvImg, 1, 22);
   var results = [];
   for (var k in points) {
@@ -917,13 +941,13 @@ function findTsums(img) {
     var avgr = (hsv1.r + hsv2.r + hsv3.r + hsv4.r + hsv5.r) / 5;
     results.push({x: p.x, y: p.y, z: p.r, b: avgb, g: avgg, r: avgr});
   }
-  
+
   // saveImage(mask, getStoragePath() + "/tmp/mask.jpg");
   // saveImage(hsvImg, getStoragePath() + "/tmp/hsvImg.jpg");
-  
+
   releaseImage(mask);
   releaseImage(hsvImg);
-  
+
   return results;
 }
 
@@ -1055,8 +1079,8 @@ Tsum.prototype.detect = function() {
 
 Tsum.prototype.init = function(detect) {
   log(this.logs.calculateScreenSize);
-  
-  var extraOffsetY = 0; 
+
+  var extraOffsetY = 0;
   if (detect) {
     var topBottom = this.detect();
     var h = topBottom.bottom - topBottom.top;
@@ -1106,6 +1130,8 @@ Tsum.prototype.init = function(detect) {
 
   this.sleep(200);
   log(this.logs.offset, this.gameOffsetX, this.gameOffsetY, this.screenHeight, this.screenWidth);
+  log(this.captureGameRatio, this.playHeight, this.playWidth, this.gameHeight, this.gameWidth);
+
   this.sleep(1000);
   execute("mkdir -p " + this.storagePath + '/tmp');
   this.sleep(200);
@@ -1175,11 +1201,11 @@ Tsum.prototype.startApp = function() {
 
 Tsum.prototype.screenshot = function() {
   return getScreenshotModify(
-    0, 
-    0, 
-    this.screenWidth, 
-    this.screenHeight, 
-    this.screenWidth / this.resizeRatio, 
+    0,
+    0,
+    this.screenWidth,
+    this.screenHeight,
+    this.screenWidth / this.resizeRatio,
     this.screenHeight / this.resizeRatio,
     80
   );
@@ -1187,11 +1213,11 @@ Tsum.prototype.screenshot = function() {
 
 Tsum.prototype.playScreenshot = function() {
   return getScreenshotModify(
-    this.playOffsetX, 
-    this.playOffsetY, 
-    this.playWidth, 
-    this.playHeight, 
-    this.playResizeWidth, 
+    this.playOffsetX,
+    this.playOffsetY,
+    this.playWidth,
+    this.playHeight,
+    this.playResizeWidth,
     this.playResizeHeight,
     100
   );
@@ -1255,18 +1281,25 @@ Tsum.prototype.tapUp = function(xy, during) {
 }
 
 Tsum.prototype.linkTsums = function(path) {
+  //var img = getScreenshot();
   for (var j in path) {
     var point = path[j];
+    //playResize 200, playwidth 540, offsetX = 0,
     var x = Math.floor(this.playOffsetX + (point.x + Config.tsumWidth / 2) * this.playWidth / this.playResizeWidth);
     var y = Math.floor(this.playOffsetY + (point.y + Config.tsumWidth / 2) * this.playHeight / this.playResizeHeight);
+    //log('Linking step: ',j,'x:',x,' y:',y)
+    //drawCircle(img, x, y, 4, 255, 0, 255, 255);
     if (j == 0) {
-      tapDown(x, y, 24);
+      tapDown(x, y, 30);
     }
-    moveTo(x, y, 16);
+    moveTo(x, y, 30);
     if (j == path.length - 1) {
-      tapUp(x, y, 24);
+      tapUp(x, y, 30);
     }
   }
+
+//  saveImage(img, getStoragePath() + "/tmp/linkImage" x ".png");
+
 }
 
 Tsum.prototype.link = function(paths) {
@@ -1277,6 +1310,10 @@ Tsum.prototype.link = function(paths) {
       isBubble = true;
     }
     this.linkTsums(path);
+
+    if (i>2) {
+      break;
+    }
   }
   return isBubble;
 }
@@ -1357,7 +1394,7 @@ Tsum.prototype.goFriendPage = function() {
   }
 }
 
-Tsum.prototype.checkGameItem = function() { 
+Tsum.prototype.checkGameItem = function() {
   var isItemsOn = [false, false, false, false, false, false];
   if (this.enableAllItems) {
     isItemsOn = [true, true, true, true, true, true];
@@ -1413,7 +1450,7 @@ Tsum.prototype.goGamePlayingPage = function() {
       this.checkGameItem();
       this.sendMoneyInfo();
       this.tap(Button.outStart2);
-      this.sleep(3000); // avoid checking items again!
+      this.sleep(5000); // avoid checking items again!
     } else if (page == 'GamePlaying') {
       // check again
       page = this.findPage(1, 500);
@@ -1437,7 +1474,7 @@ Tsum.prototype.findMyTsum = function() {
     this.playOffsetY + this.playHeight,
     tsumSize * 1.7,
     tsumSize * 1.7,
-    Config.tsumWidth * 2.1, 
+    Config.tsumWidth * 2.1,
     Config.tsumWidth * 2.1,
     100
   );
@@ -1623,7 +1660,7 @@ Tsum.prototype.scanBoardQuick = function() {
     this.tap(Button.gamePause);
   }
 
-  var points = findTsums(srcImg);
+  var points = findTsums(srcImg,this.storagePath, this.runTimes);
   log(this.logs.recognitionStart);
   var tcs = classifyTsums(points);
   tcs.sort(function(a, b) { return a.points.length > b.points.length ? -1: 1; });
@@ -1670,7 +1707,7 @@ Tsum.prototype.taskPlayGameQuick = function() {
   this.runTimes = 0;
   var clearBubbles = 0;
   var zeroPath = 0;
-  while(this.isRunning) {  
+  while(this.isRunning) {
     var board = this.scanBoardQuick();
     if (board == undefined || board == null) {
       break;
@@ -1717,6 +1754,9 @@ Tsum.prototype.taskPlayGameQuick = function() {
       this.sleep(500);
       page = this.findPage(1, 2500);
       if (page != 'GamePlaying' && page != 'GamePause') {
+          var img = this.screenshot();
+          saveImage(img, this.storagePath + "/tmp/gameOver.jpg");
+          releaseImage(img);
         log(this.logs.gameOver);
         break;
       }
@@ -1775,7 +1815,7 @@ Tsum.prototype.taskPlayGame = function() {
       clearBubbles = 0;
       this.clearAllBubbles();
     }
-    
+
     if (this.useFan && this.runTimes % 4 == 3) {
       this.tap(Button.gameRand, 100);
       this.tap(Button.gameRand, 100);
@@ -1861,7 +1901,7 @@ Tsum.prototype.recognizeSender = function(img) {
   // console.log("Score: " + score);
   if (existFilename == '') {
     var now = nowTime();
-    var dayTime = Math.floor(now / (24 * 60 * 60 * 1000)); 
+    var dayTime = Math.floor(now / (24 * 60 * 60 * 1000));
     // not found, new friend
     var filename = 'f_' + now + '.png';
     this.record[filename] = {
@@ -1891,7 +1931,7 @@ Tsum.prototype.countReceiveHeart = function(existFilename) {
   }
   log(this.logs.calculatingHeartSender);
   var now = nowTime();
-  var dayTime = Math.floor(now / (24 * 60 * 60 * 1000)); 
+  var dayTime = Math.floor(now / (24 * 60 * 60 * 1000));
   // found
   if (this.record[existFilename].receiveCounts[dayTime] == undefined) {
     this.record[existFilename].receiveCounts[dayTime] = 0;
@@ -1999,7 +2039,7 @@ Tsum.prototype.taskReceiveOneItem = function() {
     if (!isNonItem) {
       receiveTime = Date.now();
     }
-    
+
     if (Date.now() - receiveTime > 2000) {
       this.tap(Button.outClose);
       this.goFriendPage();
@@ -2105,7 +2145,7 @@ Tsum.prototype.taskSendHearts = function() {
       for (var h in heartsPos) {
         var success = this.sendHeart(heartsPos[h]);
         if (!success) {
-          success = this.sendHeart(heartsPos[h]); 
+          success = this.sendHeart(heartsPos[h]);
         }
         if (success) {
           rTimes++;
@@ -2243,7 +2283,7 @@ function start(isJP, detect, autoLaunch, autoPlay, isSlowCalculation, isPause, c
   if (largeImage) {
     ts.resizeRatio = 1;
   }
-  
+
   if (ts.recordReceive) {
     ts.readRecord();
   }
@@ -2253,7 +2293,7 @@ function start(isJP, detect, autoLaunch, autoPlay, isSlowCalculation, isPause, c
       sentCount: 0,
     };
   }
-  
+
   if (!checkFunction(TaskController)) {
     console.log("File lose...");
     return;
@@ -2326,7 +2366,7 @@ function genRecordTable() {
     var base64 = getBase64FromImage(tmpImg);
     releaseImage(tmpImg);
     html += "<td><img src='data:image/png;base64," + base64 + "' /></td>";
-    
+
     var totalDay = 0;
     var totalCount = 0;
     var tmpHtml = "";
